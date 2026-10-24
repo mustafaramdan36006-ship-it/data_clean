@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>نموذج تنضيف داتا الطلبات – مصطفى رمضان</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#f2f5f6;--surface:#fff;--ink:#17262b;--muted:#5b6b70;--line:#d5dee0;--bad:#fde8c8;--badink:#8a4b00;--good:#d9f1ea;--goodink:#0b5d52;--accent:#0f766e;--code:#101c20;--codeink:#d7e7e4;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a1d;--surface:#15262a;--ink:#e6f0ef;--muted:#9bb0b3;--line:#27403f;--bad:#4a3510;--badink:#ffd9a0;--good:#12433c;--goodink:#a8ecdd;--accent:#4fd1bd;--code:#0a1416;--codeink:#cfe6e2;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1a1d;--surface:#15262a;--ink:#e6f0ef;--muted:#9bb0b3;--line:#27403f;--bad:#4a3510;--badink:#ffd9a0;--good:#12433c;--goodink:#a8ecdd;--accent:#4fd1bd;--code:#0a1416;--codeink:#cfe6e2;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;line-height:1.8}
+main{max-width:920px;margin:0 auto;padding:32px 18px 64px}
+h1{font-size:clamp(1.6rem,4.5vw,2.4rem);line-height:1.35;margin:0 0 10px}
+h2{font-size:1.3rem;margin:44px 0 12px}
+p{margin:0 0 12px;max-width:64ch}
+.note{background:var(--surface);border-inline-start:4px solid var(--accent);padding:12px 16px;color:var(--muted);font-size:.93rem;border-radius:4px}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:.92rem}
+th,td{padding:8px 12px;text-align:start;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:500;font-size:.85rem}
+td.b{background:var(--bad);color:var(--badink)}
+td.g{background:var(--good);color:var(--goodink)}
+tr:last-child td{border-bottom:0}
+.ltr{direction:ltr;unicode-bidi:isolate;text-align:left}
+.cap{font-size:.88rem;color:var(--muted);margin:8px 0 22px}
+.steps{display:grid;gap:10px;padding:0;list-style:none;margin:0}
+.steps li{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 14px}
+.steps b{display:block}
+.steps span{color:var(--muted);font-size:.92rem}
+pre{direction:ltr;text-align:left;background:var(--code);color:var(--codeink);padding:16px;border-radius:6px;overflow-x:auto;font-size:.82rem;line-height:1.65;margin:0}
+.who{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:.95rem}
+</style>
+</head>
+<body>
+<main>
+<h1>تنضيف داتا طلبات: من ملف مبعثر لداتا جاهزة للتحليل</h1>
+<p>نموذج توضيحي لطريقة شغلي في تنضيف ملفات الطلبات بـ Python و pandas. كل مشكلة بتتعالج بخطوة واضحة وبتتسجل في تقرير.</p>
+<p class="note">ملحوظة: الداتا هنا عينة تجريبية مصطنعة (Synthetic Data) عملتها لتوضيح الطريقة، مش داتا عميل حقيقي.</p>
+
+<h2>قبل التنضيف</h2>
+<div class="scroll"><table>
+<tr><th>id</th><th>customer</th><th>city</th><th>date</th><th>price</th><th>qty</th></tr>
+<tr><td>1</td><td class="b">&nbsp;ahmed ALI&nbsp;</td><td class="b">mansoura&nbsp;</td><td class="b ltr">03/10/2026</td><td class="b ltr">1,250 EGP</td><td>2</td></tr>
+<tr><td>2</td><td class="b">Ahmed Ali</td><td>Mansoura</td><td class="ltr">2026-10-03</td><td class="b ltr">1250</td><td>2</td></tr>
+<tr><td>3</td><td class="b">sara hassan</td><td class="b">CAIRO</td><td class="b ltr">4 Oct 2026</td><td class="b ltr">N/A</td><td>1</td></tr>
+<tr><td>4</td><td class="b">omar  khaled</td><td class="b">Alexandria&nbsp;</td><td class="b ltr">2026/10/05</td><td class="b ltr">899.50 EGP</td><td class="b">-3</td></tr>
+<tr><td>5</td><td>mona samir</td><td class="b">(فاضي)</td><td class="ltr">2026-10-06</td><td class="b ltr">-</td><td class="b">0</td></tr>
+<tr><td>6</td><td>Ali Hany</td><td class="b">cairo</td><td class="b ltr">07.10.2026</td><td class="b ltr">2,400 EGP</td><td class="b">500</td></tr>
+</table></div>
+<p class="cap">الخانات الملوّنة هي المشاكل: مسافات زيادة، حروف مختلفة، تواريخ بصيغ متعددة، سعر نصي، قيم ناقصة، وكميات غير منطقية.</p>
+
+<h2>بعد التنضيف</h2>
+<div class="scroll"><table>
+<tr><th>id</th><th>customer</th><th>city</th><th>date</th><th>price</th><th>qty</th><th>flags</th></tr>
+<tr><td>1</td><td class="g">Ahmed Ali</td><td class="g">Mansoura</td><td class="g ltr">2026-10-03</td><td class="g ltr">1250.0</td><td>2</td><td>–</td></tr>
+<tr><td>3</td><td class="g">Sara Hassan</td><td class="g">Cairo</td><td class="g ltr">2026-10-04</td><td class="g ltr">1250.0</td><td>1</td><td class="ltr">price_imputed</td></tr>
+<tr><td>4</td><td class="g">Omar Khaled</td><td class="g">Alexandria</td><td class="g ltr">2026-10-05</td><td class="g ltr">899.5</td><td class="g">–</td><td class="ltr">invalid_qty</td></tr>
+<tr><td>5</td><td>Mona Samir</td><td class="g">Unknown</td><td class="ltr">2026-10-06</td><td class="g">–</td><td class="g">–</td><td class="ltr">price_missing, invalid_qty</td></tr>
+<tr><td>6</td><td>Ali Hany</td><td class="g">Cairo</td><td class="g ltr">2026-10-07</td><td class="g ltr">2400.0</td><td>500</td><td class="ltr">qty_outlier</td></tr>
+</table></div>
+<p class="cap">6 صفوف بقت 5 بعد حذف المكرر (الصف 2 هو نفس الصف 1 بعد توحيد الحروف والمسافات). مفيش صف اتمسح بدون سبب، والقيم المشكوك فيها اتعلّمت في عمود flags بدل ما تتخمّن.</p>
+
+<h2>القرارات اللي بتتاخد في كل مشكلة</h2>
+<ul class="steps">
+<li><b>الصفوف المكررة</b><span>توحيد الحروف والمسافات الأول، وبعدين drop_duplicates، فالتكرار المخفي بيتلقط.</span></li>
+<li><b>القيم الناقصة</b><span>كل الأشكال (N/A، -، null، NaN، فاضي) بتتحول لقيمة ناقصة موحدة. السعر بيتعبّى بالـ median ومعاه علامة، والمدينة بتبقى Unknown.</span></li>
+<li><b>التواريخ</b><span>قراءة كل الصيغ وتحويلها لـ YYYY-MM-DD، وأي تاريخ مش مفهوم بيتعلّم للمراجعة.</span></li>
+<li><b>السعر</b><span>شيل EGP والفواصل وتحويله لرقم float.</span></li>
+<li><b>الكميات</b><span>الصفر والسالب بيتحولوا لقيمة ناقصة مع علامة، والقيم الشاذة بتتعلّم بطريقة IQR بدل ما تتمسح.</span></li>
+<li><b>أنواع البيانات</b><span>تثبيت نوع كل عمود (int, float, datetime, string) في آخر خطوة والتأكد منه.</span></li>
+</ul>
+
+<h2>الكود</h2>
+<pre>import pandas as pd, numpy as np
+
+df = pd.read_csv("orders.csv", dtype=str)
+
+# 1) توحيد القيم الناقصة بكل أشكالها
+na_values = ["", "n/a", "na", "-", "nan", "null", "none"]
+df = df.apply(lambda s: s.str.strip())
+df = df.apply(lambda s: s.mask(s.str.lower().isin(na_values)))
+
+# 2) توحيد الأسماء والمدن (حروف + مسافات)
+for col in ["customer", "city"]:
+    df[col] = (df[col].str.replace(r"\s+", " ", regex=True)
+                      .str.strip().str.title())
+df["city"] = df["city"].fillna("Unknown")
+
+# 3) حذف المكرر بعد التوحيد
+before = len(df)
+df = df.drop_duplicates(subset=["customer", "city", "date", "price", "qty"])
+print("duplicates removed:", before - len(df))
+
+# 4) التواريخ -> YYYY-MM-DD
+df["date"] = pd.to_datetime(df["date"], format="mixed", dayfirst=True, errors="coerce")
+
+# 5) السعر -> رقم
+df["price"] = pd.to_numeric(
+    df["price"].str.replace("EGP", "", case=False).str.replace(",", ""),
+    errors="coerce")
+df["price_imputed"] = df["price"].isna()
+df["price"] = df["price"].fillna(df["price"].median())
+
+# 6) الكميات غير المنطقية
+df["qty"] = pd.to_numeric(df["qty"], errors="coerce")
+df["invalid_qty"] = df["qty"] &lt;= 0
+df.loc[df["invalid_qty"], "qty"] = np.nan
+q1, q3 = df["qty"].quantile([.25, .75])
+df["qty_outlier"] = df["qty"] &gt; q3 + 1.5 * (q3 - q1)
+
+# 7) أنواع البيانات النهائية + الحفظ
+df = df.astype({"customer": "string", "city": "string", "price": "float"})
+df["qty"] = df["qty"].astype("Int64")
+df["date"] = df["date"].dt.strftime("%Y-%m-%d")
+df.to_csv("orders_clean.csv", index=False)</pre>
+
+<p class="who">مصطفى رمضان – Data Engineering trainee (DEPI) – طالب في كلية الحاسبات والمعلومات، جامعة المنصورة.</p>
+</main>
+</body>
+</html>
